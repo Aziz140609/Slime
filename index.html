@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Slime</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+    <script>
+        var snd_ambience = null;
+        var layoutSize = { 'w': 1024, 'h': 768};
+        var X_POSITION = 1024 / 2;
+        var Y_POSITION = 768 / 2;
+        console.log("Scripts loaded, starting config...");
+    </script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            overflow: hidden;
+        }
+    </style>
+    <script src="assets/scripts/sceneMenu.js"></script>
+    <script src="assets/scripts/scenePlay.js"></script>
+</head>
+<body>
+<script>
+    const config = {
+        type: Phaser.AUTO,
+        width: window.innerWidth,
+        height: window.innerHeight,
+        backgroundColor: '#3498db',
+        parent: 'game-container',
+        scale: {
+            mode: Phaser.Scale.RESIZE,
+            autoCenter: Phaser.Scale.CENTER_BOTH
+        },
+        scene: [sceneMenu, scenePlay],
+        physics: {
+            default: 'arcade',
+            arcade: {
+                gravity: { y: 200 }
+            }
+        }
+    };
+    console.log("Initializing Phaser Game...");
+    window.onload = function() {
+        const game = new Phaser.Game(config);
+    };
+</script>
+<div id="game-container"></div>
+</body>
+</html>
