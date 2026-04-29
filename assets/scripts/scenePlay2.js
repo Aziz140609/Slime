@@ -1,12 +1,12 @@
-var scenePlay = new Phaser.Class({
+var scenePlay2 = new Phaser.Class({
     Extends: Phaser.Scene,
     initialize: function () {
-        Phaser.Scene.call(this, { key: 'scenePlay' });
+        Phaser.Scene.call(this, { key: 'scenePlay2' });
     },
 
     preload: function () {
         // Tilemaps
-        this.load.tilemapTiledJSON('map1', 'assets/maps/map1.tmj'); // only map1 used
+        this.load.tilemapTiledJSON('map2', 'assets/maps/map2.tmj'); // load map2
         this.load.image('world_tiles', 'assets/maps/world_tileset.png');
         this.load.spritesheet('knight', 'assets/images/knight.png', {
             frameWidth: 32, frameHeight: 32
@@ -19,7 +19,7 @@ var scenePlay = new Phaser.Class({
     create: function () {
 
         // 🧱 MAP
-        const map = this.make.tilemap({ key: 'map1' });
+        const map = this.make.tilemap({ key: 'map2' });
         const tileset = map.addTilesetImage('world_tileset', 'world_tiles');
 
         // Memanggil semua layer yang ada di map.json
@@ -27,6 +27,8 @@ var scenePlay = new Phaser.Class({
         const layer1 = map.createLayer('Tile Layer 1', tileset, 0, 0);
         const layer2 = map.createLayer('Tile Layer 2', tileset, 0, 0);
         const layer3 = map.createLayer('Tile Layer 3', tileset, 0, 0);
+        const layer4 = map.createLayer('Tile Layer 4', tileset, 0, 0);
+        const layer5 = map.createLayer('Tile Layer 5', tileset, 0, 0);
 
         this.anims.create({
             key: 'coin_spin',
@@ -73,7 +75,7 @@ var scenePlay = new Phaser.Class({
         this.coins = this.physics.add.group();
 
         const coinPositions = [
-            { x: 200, y: 200 },
+            { x: 200, y: 550 },
             { x: 400, y: 550 },
             { x: 600, y: 550 }
         ];
@@ -81,11 +83,11 @@ var scenePlay = new Phaser.Class({
         coinPositions.forEach(pos => {
             let coin = this.coins.create(pos.x, pos.y, 'coin');
             coin.play('coin_spin');
+            coin.setScale(1.5); // optional biar gede
             coin.body.allowGravity = false; // biar gak jatuh
         });
 
-        this.player = this.physics.add.sprite(100, 100, 'knight');
-        this.player.setScale(1);
+        this.player = this.physics.add.sprite(10, 175, 'knight');
         
         // Memperkecil kotak fisika (hitbox) agar tidak mengambang di atas tanah
         // setSize(lebar, tinggi) mengatur ukuran kotak
@@ -99,6 +101,36 @@ var scenePlay = new Phaser.Class({
         layer2.setCollisionByExclusion([-1]);
         this.physics.add.collider(this.player, layer2);
 
+        // Menambahkan efek memantul (trampolin) jika menyentuh layer 5
+        layer5.setCollisionByExclusion([-1]);
+        this.physics.add.collider(this.player, layer5, (player, tile) => {
+            // Memastikan player terpental hanya ketika menginjak dari atas
+            if (player.body.blocked.down) {
+                const bouncePower = -500; // UBAH ANGKA INI UNTUK MENGATUR TINGGI PANTULAN (semakin negatif = semakin tinggi)
+                player.setVelocityY(bouncePower);
+            }
+        });
+
+        // --- JEBAKAN (Layer 3) ---
+        layer3.setCollisionByExclusion([-1]);
+        this.physics.add.collider(this.player, layer3, () => {
+            if (this.isDead) return; // Mencegah kode ini berjalan berulang-ulang
+            this.isDead = true; // Tandai player sudah mati
+
+            // Hentikan pergerakan
+            this.player.setVelocity(0, 0);
+            // Nonaktifkan physics agar tidak terkena efek gravitasi atau input saat mati
+            this.player.body.enable = false; 
+
+            // Mainkan animasi mati
+            this.player.play('death');
+
+            // Setelah animasi 'death' selesai dimainkan, kembali ke scenePlay (map 1)
+            this.player.once('animationcomplete-death', () => {
+                this.scene.start('scenePlay');
+            });
+        });
+
         // Scaling otomatis sekarang ditangani oleh index.html (FIT)
 
         // Deteksi jika player dan koin saling tumpang tindih (overlap), maka panggil fungsi collectCoin
@@ -107,11 +139,17 @@ var scenePlay = new Phaser.Class({
         // Setup input keyboard
         this.cursors = this.input.keyboard.createCursorKeys();
         
-        // Status dash
+        // Status gerakan & status hidup
         this.isDashing = false;
+        this.isDead = false;
     },
 
     update: function () {
+
+        // Jika sudah mati, abaikan semua input agar animasi mati tidak tertimpa
+        if (this.isDead) {
+            return;
+        }
 
         // Jika sedang dash, abaikan input gerak biasa agar kecepatan dan animasinya tidak terganggu
         if (this.isDashing) {
@@ -141,11 +179,11 @@ var scenePlay = new Phaser.Class({
         }
 
         if (this.cursors.left.isDown) {
-            this.player.setVelocityX(-125); // Lari diperlambat
+            this.player.setVelocityX(-100); // Lari diperlambat
             this.player.play('run', true);
             this.player.setFlipX(true);
         } else if (this.cursors.right.isDown) {
-            this.player.setVelocityX(125); // Lari diperlambat
+            this.player.setVelocityX(100); // Lari diperlambat
             this.player.play('run', true);
             this.player.setFlipX(false);
         } else {
@@ -156,11 +194,6 @@ var scenePlay = new Phaser.Class({
         // Logika lompat (hanya bisa lompat jika tombol atas ditekan & sedang menyentuh tanah)
         if (this.cursors.up.isDown && this.player.body.blocked.down) {
             this.player.setVelocityY(-250); // Kecepatan lompat diperlambat
-        }
-
-        // Pindah ke scenePlay2 (map selanjutnya) jika player berjalan melebihi batas kanan layar (672px)
-        if (this.player.x > 672) {
-            this.scene.start('scenePlay2');
         }
     },
 

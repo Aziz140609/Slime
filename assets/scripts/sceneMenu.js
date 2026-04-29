@@ -18,14 +18,14 @@ var sceneMenu = new Phaser.Class({
         bg.setDisplaySize(width, height).setScrollFactor(0);
 
 
-        let play = this.add.image(width / 2, height / 2 + 150, 'play').setScale(0.5).setInteractive();
-        let slime = this.add.image(width / 2, height / 2 - 150, 'slime').setScale(0.5);
+        let play = this.add.image(width / 2, height / 2 + 80, 'play').setScale(0.2).setInteractive();
+        let slime = this.add.image(width / 2, height / 2 - 40, 'slime').setScale(0.15);
 
         // Animasi kenyel-kenyel untuk slime (Judul/Karakter)
         this.tweens.add({
             targets: slime,
-            scaleX: 0.55,
-            scaleY: 0.45,
+            scaleX: 0.16,
+            scaleY: 0.14,
             duration: 800,
             yoyo: true,
             repeat: -1,
@@ -35,8 +35,8 @@ var sceneMenu = new Phaser.Class({
         // Animasi denyut/kenyel untuk tombol Play
         this.tweens.add({
             targets: play,
-            scaleX: 0.55,
-            scaleY: 0.55,
+            scaleX: 0.22,
+            scaleY: 0.22,
             duration: 1000,
             yoyo: true,
             repeat: -1,

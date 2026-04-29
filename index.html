@@ -21,24 +21,26 @@
     </style>
     <script src="assets/scripts/sceneMenu.js"></script>
     <script src="assets/scripts/scenePlay.js"></script>
+    <script src="assets/scripts/scenePlay2.js"></script>
 </head>
 <body>
 <script>
     const config = {
         type: Phaser.AUTO,
-        width: window.innerWidth,
-        height: window.innerHeight,
+        width: 672,
+        height: 320,
         backgroundColor: '#3498db',
         parent: 'game-container',
+        pixelArt: true,
         scale: {
-            mode: Phaser.Scale.RESIZE,
+            mode: Phaser.Scale.FIT,
             autoCenter: Phaser.Scale.CENTER_BOTH
         },
-        scene: [sceneMenu, scenePlay],
+        scene: [sceneMenu, scenePlay, scenePlay2],
         physics: {
             default: 'arcade',
             arcade: {
-                gravity: { y: 200 }
+                gravity: { y: 800 }
             }
         }
     };

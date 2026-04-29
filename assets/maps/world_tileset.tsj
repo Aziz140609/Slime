@@ -1,5 +1,5 @@
 { "columns":16,
- "image":"assets\/images\/world_tileset.png",
+ "image":"world_tileset.png",
  "imageheight":256,
  "imagewidth":256,
  "margin":0,
