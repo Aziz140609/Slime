@@ -183,8 +183,17 @@
  "tileheight":16,
  "tilesets":[
         {
+         "columns":16,
          "firstgid":1,
-         "source":"world_tileset.tsj"
+         "image":"world_tileset.png",
+         "imageheight":1000,
+         "imagewidth":1000,
+         "margin":0,
+         "name":"world_tileset",
+         "spacing":0,
+         "tilecount":256,
+         "tileheight":16,
+         "tilewidth":16
         }],
  "tilewidth":16,
  "type":"map",

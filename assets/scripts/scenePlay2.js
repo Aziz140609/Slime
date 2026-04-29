@@ -93,7 +93,7 @@ var scenePlay2 = new Phaser.Class({
         // setSize(lebar, tinggi) mengatur ukuran kotak
         // setOffset(geser_X, geser_Y) menggeser kotak ke arah bawah agar pas dengan gambar
         this.player.body.setSize(14, 18);
-        this.player.body.setOffset(9, 14);
+        this.player.body.setOffset(9, 10);
 
         this.player.play('idle');
 
@@ -194,6 +194,11 @@ var scenePlay2 = new Phaser.Class({
         // Logika lompat (hanya bisa lompat jika tombol atas ditekan & sedang menyentuh tanah)
         if (this.cursors.up.isDown && this.player.body.blocked.down) {
             this.player.setVelocityY(-250); // Kecepatan lompat diperlambat
+        }
+        
+        // Pindah ke map selanjutnya jika player berjalan melebihi batas kanan layar
+        if (this.player.x > 672) {
+            this.scene.start('scenePlay3');
         }
     },
 
