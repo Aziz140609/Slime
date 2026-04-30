@@ -1,12 +1,12 @@
-var scenePlay3 = new Phaser.Class({
+var scenePlay6 = new Phaser.Class({
     Extends: Phaser.Scene,
+
     initialize: function () {
-        Phaser.Scene.call(this, { key: 'scenePlay3' });
+        Phaser.Scene.call(this, { key: 'scenePlay6' });
     },
 
     preload: function () {
-        // Tilemaps
-        this.load.tilemapTiledJSON('map3', 'assets/maps/map3.tmj'); // load map3
+        this.load.tilemapTiledJSON('map6', 'assets/maps/map6.tmj'); // load map6
         this.load.image('world_tiles', 'assets/maps/world_tileset.png');
         this.load.spritesheet('knight', 'assets/images/knight.png', {
             frameWidth: 32, frameHeight: 32
@@ -17,9 +17,8 @@ var scenePlay3 = new Phaser.Class({
     },
 
     create: function () {
-
         // 🧱 MAP
-        const map = this.make.tilemap({ key: 'map3' });
+        const map = this.make.tilemap({ key: 'map6' });
         const tileset = map.addTilesetImage('world_tileset', 'world_tiles');
 
         // Memanggil semua layer yang ada di map.json
@@ -87,7 +86,7 @@ var scenePlay3 = new Phaser.Class({
             coin.body.allowGravity = false; // biar gak jatuh
         });
 
-        this.player = this.physics.add.sprite(10, 50, 'knight');
+        this.player = this.physics.add.sprite(10, 175, 'knight');
         
         // Memperkecil kotak fisika (hitbox) agar tidak mengambang di atas tanah
         // setSize(lebar, tinggi) mengatur ukuran kotak
@@ -103,10 +102,10 @@ var scenePlay3 = new Phaser.Class({
             this.physics.add.collider(this.player, layer2);
         }
 
-        // Menambahkan efek memantul (trampolin) jika menyentuh layer 5
-        if (layer5) {
-            layer5.setCollisionByExclusion([-1]);
-            this.physics.add.collider(this.player, layer5, (player, tile) => {
+        // Menambahkan efek memantul (trampolin) jika menyentuh layer 4
+        if (layer4) {
+            layer4.setCollisionByExclusion([-1]);
+            this.physics.add.collider(this.player, layer4, (player, tile) => {
                 // Memastikan player terpental hanya ketika menginjak dari atas
                 if (player.body.blocked.down) {
                     const bouncePower = -500; // UBAH ANGKA INI UNTUK MENGATUR TINGGI PANTULAN (semakin negatif = semakin tinggi)
@@ -149,72 +148,60 @@ var scenePlay3 = new Phaser.Class({
         this.isDashing = false;
         this.isDead = false;
     },
+update: function () {
 
-    update: function () {
-
-        // Jika sudah mati, abaikan semua input agar animasi mati tidak tertimpa
-        if (this.isDead) {
-            return;
-        }
-
-        // Jika sedang dash, abaikan input gerak biasa agar kecepatan dan animasinya tidak terganggu
-        if (this.isDashing) {
-            return; 
-        }
-
-        // Logika Dash (Tekan Shift)
-        if (Phaser.Input.Keyboard.JustDown(this.cursors.shift) && this.player.body.blocked.down) {
-            this.isDashing = true;
-            this.player.play('roll', true); // Gunakan animasi roll
-            
-            const dashSpeed = 200; // Kecepatan lari dash diperlambat
-            
-            // Melesat ke arah karakter menghadap (kiri/kanan)
-            if (this.player.flipX) {
-                this.player.setVelocityX(-dashSpeed);
-            } else {
-                this.player.setVelocityX(dashSpeed);
-            }
-
-            // Timer: Dash akan berhenti setelah 400 milidetik (0.4 detik)
-            this.time.delayedCall(400, () => {
-                this.isDashing = false;
-            });
-            
-            return; // Selesai untuk frame ini, jangan jalankan gerakan lain
-        }
-
-        if (this.cursors.left.isDown) {
-            this.player.setVelocityX(-100); // Lari diperlambat
-            this.player.play('run', true);
-            this.player.setFlipX(true);
-        } else if (this.cursors.right.isDown) {
-            this.player.setVelocityX(100); // Lari diperlambat
-            this.player.play('run', true);
-            this.player.setFlipX(false);
-        } else {
-            this.player.setVelocityX(0);
-            this.player.play('idle', true);
-        }
-
-        // Logika lompat (hanya bisa lompat jika tombol atas ditekan & sedang menyentuh tanah)
-        if (this.cursors.up.isDown && this.player.body.blocked.down) {
-            this.player.setVelocityY(-250); // Kecepatan lompat diperlambat
-        }
-        
-        // Pindah ke map selanjutnya jika player berjalan melebihi batas kanan layar
-        if (this.player.x > 672) {
-            this.scene.start('scenePlay4');
-        }
-
-        if (this.player.y > 320) {
-            this.scene.start('scenePlay6');
-        }
-    },
-
-    // Fungsi yang dipanggil saat player menyentuh koin
-    collectCoin: function (player, coin) {
-        // Menghilangkan koin dari layar dan menonaktifkan fisiknya (diambil)
-        coin.disableBody(true, true);
+    // Jika sudah mati, abaikan semua input agar animasi mati tidak tertimpa
+    if (this.isDead) {
+        return;
     }
+
+    // Jika sedang dash, abaikan input gerak biasa
+    if (this.isDashing) {
+        return; 
+    }
+
+    // DASH
+    if (Phaser.Input.Keyboard.JustDown(this.cursors.shift) && this.player.body.blocked.down) {
+        this.isDashing = true;
+        this.player.play('roll', true);
+        
+        const dashSpeed = 200;
+        
+        if (this.player.flipX) {
+            this.player.setVelocityX(-dashSpeed);
+        } else {
+            this.player.setVelocityX(dashSpeed);
+        }
+
+        this.time.delayedCall(400, () => {
+            this.isDashing = false;
+        });
+        
+        return;
+    }
+
+    // GERAK
+    if (this.cursors.left.isDown) {
+        this.player.setVelocityX(-100);
+        this.player.play('run', true);
+        this.player.setFlipX(true);
+    } else if (this.cursors.right.isDown) {
+        this.player.setVelocityX(100);
+        this.player.play('run', true);
+        this.player.setFlipX(false);
+    } else {
+        this.player.setVelocityX(0);
+        this.player.play('idle', true);
+    }
+
+    // LOMPAT
+    if (this.cursors.up.isDown && this.player.body.blocked.down) {
+        this.player.setVelocityY(-250);
+    }
+
+    // PINDAH SCENE
+    if (this.player.x > 672) {
+        this.scene.start('sceneMenu');
+    }
+},
 });

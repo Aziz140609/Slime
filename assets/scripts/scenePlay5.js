@@ -203,8 +203,8 @@ var scenePlay5 = new Phaser.Class({
         }
         
         // Pindah ke map selanjutnya (atau ke menu awal) jika melewatinya
-        if (this.player.x > 672) {
-            this.scene.start('sceneMenu'); // Balik ke menu awal atau kemana saja setelah menang
+        if (this.player.y > 320) {
+            this.scene.start('scenePlay7'); // Balik ke menu awal atau kemana saja setelah menang
         }
     },
 
