@@ -73,42 +73,21 @@ var scenePlay4 = new Phaser.Class({
       repeat: 0,
     });
 
+        // SPAWN COIN SECARA MANUAL
     this.coins = this.physics.add.group();
-
-    const coinSpawnLayers = [layer2, layer3, layer4, layer5].filter(Boolean);
-    const preferredColumns = [
-      map.widthInPixels * 0.15,
-      map.widthInPixels * 0.32,
-      map.widthInPixels * 0.5,
-      map.widthInPixels * 0.68,
-      map.widthInPixels * 0.85,
-    ];
-
-    const coinPositions = preferredColumns.map((xPos) => {
-      const x = Math.floor(xPos);
-      const stepY = map.tileHeight || 16;
-
-      for (let y = stepY; y < map.heightInPixels - stepY; y += stepY) {
-        const overlapsLayer = coinSpawnLayers.some((layer) =>
-          layer.hasTileAtWorldXY(x, y),
-        );
-        const hasFloorBelow = layer2
-          ? layer2.hasTileAtWorldXY(x, y + stepY)
-          : true;
-
-        if (!overlapsLayer && hasFloorBelow) {
-          return { x, y };
-        }
-      }
-
-      return { x, y: stepY * 2 };
-    });
-
-    coinPositions.forEach((pos) => {
-      let coin = this.coins.create(pos.x, pos.y, "coin");
+    
+    // Fungsi bantuan untuk menaruh koin
+    const spawnCoin = (x, y) => {
+      let coin = this.coins.create(x, y, "coin");
       coin.play("coin_spin");
-      coin.body.allowGravity = false; // biar gak jatuh
-    });
+      coin.body.allowGravity = false;
+    };
+
+    // GANTI ANGKA X DAN Y DI BAWAH INI UNTUK MENGUBAH POSISI KOIN
+    spawnCoin(150, 150);
+    spawnCoin(300, 150);
+    spawnCoin(450, 150);
+    spawnCoin(600, 150);
 
     this.player = this.physics.add.sprite(10, 175, "knight");
 
@@ -172,7 +151,41 @@ var scenePlay4 = new Phaser.Class({
     );
 
     // Setup input keyboard
+    // SPAWN MUSUH SECARA MANUAL
+    this.enemies = this.add.group();
+    
+    // GANTI ANGKA X DAN Y DI BAWAH INI UNTUK MENGUBAH POSISI
+    // format: new Enemy(this, posisi_X, posisi_Y, jarak_patroli_blok)
+    this.enemies.add(new Enemy(this, 250, 150, 2)); // Musuh 1
+    this.enemies.add(new Enemy(this, 400, 150, 3)); // Musuh 2
+    this.enemies.add(new Enemy(this, 550, 150, 2)); // Musuh 3
+    
+    if (typeof layer2 !== 'undefined' && layer2) {
+      this.physics.add.collider(this.enemies, layer2);
+    }
+
+    // Tabrakan player dengan SEMUA musuh di grup
+    this.physics.add.overlap(this.player, this.enemies, (player, enemy) => {
+      if (player.body.velocity.y > 0 && player.body.bottom < enemy.body.y + 20) {
+        enemy.die(); 
+        player.setVelocityY(-250); 
+      } else {
+        if (!player.isDead) {
+          player.isDead = true;
+          player.setVelocity(0, 0); 
+          player.body.enable = false; 
+          player.play("death", true); 
+          
+          this.physics.pause(); 
+          this.time.delayedCall(1000, () => {
+            this.scene.restart();
+          });
+        }
+      }
+    });
+
     this.cursors = this.input.keyboard.createCursorKeys();
+    this.wasd = this.input.keyboard.addKeys('W,S,A,D');
 
     // Status gerakan & status hidup
     this.isDashing = false;
@@ -180,6 +193,12 @@ var scenePlay4 = new Phaser.Class({
   },
 
   update: function () {
+    if (this.enemies) {
+      this.enemies.getChildren().forEach(enemy => {
+        enemy.update();
+      });
+    }
+
     // Jika sudah mati, abaikan semua input agar animasi mati tidak tertimpa
     if (this.isDead) {
       return;
@@ -215,11 +234,11 @@ var scenePlay4 = new Phaser.Class({
       return; // Selesai untuk frame ini, jangan jalankan gerakan lain
     }
 
-    if (this.cursors.left.isDown) {
+    if (this.cursors.left.isDown || this.wasd.A.isDown) {
       this.player.setVelocityX(-100); // Lari diperlambat
       this.player.play("run", true);
       this.player.setFlipX(true);
-    } else if (this.cursors.right.isDown) {
+    } else if (this.cursors.right.isDown || this.wasd.D.isDown) {
       this.player.setVelocityX(100); // Lari diperlambat
       this.player.play("run", true);
       this.player.setFlipX(false);
@@ -229,7 +248,7 @@ var scenePlay4 = new Phaser.Class({
     }
 
     // Logika lompat (hanya bisa lompat jika tombol atas ditekan & sedang menyentuh tanah)
-    if (this.cursors.up.isDown && this.player.body.blocked.down) {
+    if ((this.cursors.up.isDown || this.wasd.W.isDown) && this.player.body.blocked.down) {
       this.player.setVelocityY(-250); // Kecepatan lompat diperlambat
     }
 
