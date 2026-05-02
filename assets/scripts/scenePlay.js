@@ -144,6 +144,7 @@ var scenePlay = new Phaser.Class({
         // Jika terkena dari samping atau bawah, player yang mati
         if (!player.isDead) {
           player.isDead = true;
+          window.gameScore = 0;
           player.setVelocity(0, 0); // Hentikan gerakan player
           player.body.enable = false; // Matikan fisika player
           player.play("death", true); // Mainkan animasi mati knight

@@ -84,10 +84,12 @@ var scenePlay2 = new Phaser.Class({
     };
 
     // GANTI ANGKA X DAN Y DI BAWAH INI UNTUK MENGUBAH POSISI KOIN
-    spawnCoin(150, 150);
-    spawnCoin(300, 150);
-    spawnCoin(450, 150);
-    spawnCoin(600, 150);
+    spawnCoin(150, 136);
+    spawnCoin(300, 105);
+    spawnCoin(440, 105);
+    spawnCoin(580, 88);
+    spawnCoin(100, 105);
+    spawnCoin(360, 185);
 
     this.player = this.physics.add.sprite(10, 175, "knight");
 
@@ -122,7 +124,8 @@ var scenePlay2 = new Phaser.Class({
       layer3.setCollisionByExclusion([-1]);
       this.physics.add.collider(this.player, layer3, () => {
         if (this.isDead) return; // Mencegah kode ini berjalan berulang-ulang
-        this.isDead = true; // Tandai player sudah mati
+        this.isDead = true;
+        window.gameScore = 0; // Tandai player sudah mati
 
         // Hentikan pergerakan
         this.player.setVelocity(0, 0);
@@ -156,10 +159,11 @@ var scenePlay2 = new Phaser.Class({
     
     // GANTI ANGKA X DAN Y DI BAWAH INI UNTUK MENGUBAH POSISI
     // format: new Enemy(this, posisi_X, posisi_Y, jarak_patroli_blok)
-    this.enemies.add(new Enemy(this, 250, 150, 2)); // Musuh 1
-    this.enemies.add(new Enemy(this, 400, 150, 3)); // Musuh 2
-    this.enemies.add(new Enemy(this, 550, 150, 2)); // Musuh 3
-    
+    this.enemies.add(new Enemy(this, 240, 150, 1)); // Musuh 1
+    this.enemies.add(new Enemy(this, 350, 250, 4)); // Musuh 2
+    this.enemies.add(new Enemy(this, 550, 88, 2)); // Musuh 3
+    this.enemies.add(new Enemy(this, 70, 88, 2));
+
     if (typeof layer2 !== 'undefined' && layer2) {
       this.physics.add.collider(this.enemies, layer2);
     }
@@ -172,6 +176,7 @@ var scenePlay2 = new Phaser.Class({
       } else {
         if (!player.isDead) {
           player.isDead = true;
+          window.gameScore = 0;
           player.setVelocity(0, 0); 
           player.body.enable = false; 
           player.play("death", true); 

@@ -84,10 +84,14 @@ var scenePlay3 = new Phaser.Class({
     };
 
     // GANTI ANGKA X DAN Y DI BAWAH INI UNTUK MENGUBAH POSISI KOIN
-    spawnCoin(150, 150);
-    spawnCoin(300, 150);
-    spawnCoin(450, 150);
-    spawnCoin(600, 150);
+    spawnCoin(150, 250);
+    spawnCoin(300, 120);
+    spawnCoin(7 * 17,7 * 7);
+    spawnCoin(17 * 7, 17 * 13);
+    spawnCoin(17 * 23, 17 * 4);
+    spawnCoin(17 * 29, 17 * 5);
+    spawnCoin(17 * 33, 17 * 8);
+
 
     this.player = this.physics.add.sprite(10, 50, "knight");
 
@@ -122,7 +126,8 @@ var scenePlay3 = new Phaser.Class({
       layer3.setCollisionByExclusion([-1]);
       this.physics.add.collider(this.player, layer3, () => {
         if (this.isDead) return; // Mencegah kode ini berjalan berulang-ulang
-        this.isDead = true; // Tandai player sudah mati
+        this.isDead = true;
+        window.gameScore = 0; // Tandai player sudah mati
 
         // Hentikan pergerakan
         this.player.setVelocity(0, 0);
@@ -172,6 +177,7 @@ var scenePlay3 = new Phaser.Class({
       } else {
         if (!player.isDead) {
           player.isDead = true;
+          window.gameScore = 0;
           player.setVelocity(0, 0); 
           player.body.enable = false; 
           player.play("death", true); 
