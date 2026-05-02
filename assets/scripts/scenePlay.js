@@ -8,6 +8,7 @@ var scenePlay = new Phaser.Class({
     // Tilemaps
     this.load.tilemapTiledJSON("map1", "assets/maps/map1.tmj"); // only map1 used
     this.load.image("world_tiles", "assets/maps/world_tileset.png");
+    this.load.image("title", "assets/images/title.png");
     this.load.spritesheet("knight", "assets/images/knight.png", {
       frameWidth: 32,
       frameHeight: 32,
@@ -26,6 +27,9 @@ var scenePlay = new Phaser.Class({
     // 🧱 MAP
     const map = this.make.tilemap({ key: "map1" });
     const tileset = map.addTilesetImage("world_tileset", "world_tiles");
+    
+    // Jika title.png adalah Logo (UI) yang harus tampil di paling depan:
+    this.add.image(100, 100, "title").setOrigin(0, 0).setDepth(20);
 
     // Memanggil semua layer yang ada di map.json
 
@@ -86,10 +90,10 @@ var scenePlay = new Phaser.Class({
     };
 
     // GANTI ANGKA X DAN Y DI BAWAH INI UNTUK MENGUBAH POSISI KOIN
-    spawnCoin(150, 150);
-    spawnCoin(300, 150);
-    spawnCoin(450, 150);
-    spawnCoin(600, 150);
+    spawnCoin(150, 250);
+    spawnCoin(300, 233);
+    spawnCoin(450, 250);
+    spawnCoin(600, 216);
 
     this.player = this.physics.add.sprite(100, 100, "knight");
     this.player.setScale(1);
@@ -125,7 +129,6 @@ var scenePlay = new Phaser.Class({
     // format: new Enemy(this, posisi_X, posisi_Y, jarak_patroli_blok)
     this.enemies.add(new Enemy(this, 250, 150, 2)); // Musuh 1
     this.enemies.add(new Enemy(this, 400, 150, 5)); // Musuh 2
-    this.enemies.add(new Enemy(this, 600, 150, 1)); // Musuh 3
     
     if (typeof layer2 !== 'undefined' && layer2) {
       this.physics.add.collider(this.enemies, layer2);
@@ -155,6 +158,16 @@ var scenePlay = new Phaser.Class({
     });
 
     // Setup input keyboard
+    
+    // UI Skor Koin
+    window.gameScore = window.gameScore || 0;
+    this.scoreText = this.add.text(16, 16, 'Coin: ' + window.gameScore, {
+      fontFamily: '"Press Start 2P", Courier, monospace',
+      fontSize: '16px', 
+      fill: '#f1c40f',
+      stroke: '#000',
+      strokeThickness: 4
+    }).setScrollFactor(0).setDepth(100);
     this.cursors = this.input.keyboard.createCursorKeys();
     
     // Tambahkan kontrol WASD
@@ -230,5 +243,9 @@ var scenePlay = new Phaser.Class({
   collectCoin: function (player, coin) {
     // Menghilangkan koin dari layar dan menonaktifkan fisiknya (diambil)
     coin.disableBody(true, true);
+    
+    // Tambah skor koin
+    window.gameScore += 1;
+    this.scoreText.setText('Coin: ' + window.gameScore);
   },
 });

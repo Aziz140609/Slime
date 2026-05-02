@@ -184,6 +184,16 @@ var scenePlay7 = new Phaser.Class({
       }
     });
 
+    
+    // UI Skor Koin
+    window.gameScore = window.gameScore || 0;
+    this.scoreText = this.add.text(16, 16, 'Coin: ' + window.gameScore, {
+      fontFamily: '"Press Start 2P", Courier, monospace',
+      fontSize: '16px', 
+      fill: '#f1c40f',
+      stroke: '#000',
+      strokeThickness: 4
+    }).setScrollFactor(0).setDepth(100);
     this.cursors = this.input.keyboard.createCursorKeys();
     this.wasd = this.input.keyboard.addKeys('W,S,A,D');
 
@@ -258,6 +268,11 @@ var scenePlay7 = new Phaser.Class({
   },
 
   collectCoin: function (player, coin) {
+    // Menghilangkan koin dari layar dan menonaktifkan fisiknya (diambil)
     coin.disableBody(true, true);
+    
+    // Tambah skor koin
+    window.gameScore += 1;
+    this.scoreText.setText('Coin: ' + window.gameScore);
   },
 });
