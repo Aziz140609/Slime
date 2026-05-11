@@ -89,8 +89,8 @@ var scenePlay3 = new Phaser.Class({
     spawnCoin(7 * 17,7 * 7);
     spawnCoin(17 * 7, 17 * 13);
     spawnCoin(17 * 23, 17 * 4);
-    spawnCoin(17 * 29, 17 * 5);
-    spawnCoin(17 * 33, 17 * 8);
+    spawnCoin(493, 75);
+    spawnCoin(575, 90);
 
 
     this.player = this.physics.add.sprite(10, 50, "knight");
@@ -161,9 +161,13 @@ var scenePlay3 = new Phaser.Class({
     
     // GANTI ANGKA X DAN Y DI BAWAH INI UNTUK MENGUBAH POSISI
     // format: new Enemy(this, posisi_X, posisi_Y, jarak_patroli_blok)
-    this.enemies.add(new Enemy(this, 250, 150, 2)); // Musuh 1
-    this.enemies.add(new Enemy(this, 400, 150, 3)); // Musuh 2
+    this.enemies.add(new Enemy(this, 155, 250, 2)); // Musuh 1
+    this.enemies.add(new Enemy(this, 375, 150, 1.5)); // Musuh 2
     this.enemies.add(new Enemy(this, 550, 150, 2)); // Musuh 3
+    this.enemies.add(new Enemy(this, 400, 10, 3));
+    this.enemies.add(new Enemy(this, 200, 10, 1));
+    this.enemies.add(new Enemy(this, 305, 300, 3)); 
+    this.enemies.add(new Enemy(this, 550, 300, 2));
     
     if (typeof layer2 !== 'undefined' && layer2) {
       this.physics.add.collider(this.enemies, layer2);
@@ -172,19 +176,21 @@ var scenePlay3 = new Phaser.Class({
     // Tabrakan player dengan SEMUA musuh di grup
     this.physics.add.overlap(this.player, this.enemies, (player, enemy) => {
       if (player.body.velocity.y > 0 && player.body.bottom < enemy.body.y + 20) {
+        // Injak dari atas: musuh mati, player mantul
         enemy.die(); 
         player.setVelocityY(-250); 
       } else {
+        // Kena dari depan/samping: player mati, kembali ke map 1
         if (!player.isDead) {
           player.isDead = true;
+          this.isDead = true;
           window.gameScore = 0;
           player.setVelocity(0, 0); 
           player.body.enable = false; 
           player.play("death", true); 
-          
-          this.physics.pause(); 
-          this.time.delayedCall(1000, () => {
-            this.scene.restart();
+
+          player.once("animationcomplete-death", () => {
+            this.scene.start("scenePlay");
           });
         }
       }

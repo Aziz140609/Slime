@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Slime</title>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js"></script>
     <script>
         var snd_ambience = null;
         var layoutSize = { 'w': 1024, 'h': 768};
@@ -54,7 +54,18 @@
     };
     console.log("Initializing Phaser Game...");
     window.onload = function() {
-        const game = new Phaser.Game(config);
+        WebFont.load({
+            google: {
+                families: ['Press Start 2P']
+            },
+            active: function() {
+                const game = new Phaser.Game(config);
+            },
+            inactive: function() {
+                // Font gagal load, tetap jalankan game dengan fallback
+                const game = new Phaser.Game(config);
+            }
+        });
     };
 </script>
 <div id="game-container"></div>

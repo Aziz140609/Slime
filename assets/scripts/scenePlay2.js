@@ -171,19 +171,21 @@ var scenePlay2 = new Phaser.Class({
     // Tabrakan player dengan SEMUA musuh di grup
     this.physics.add.overlap(this.player, this.enemies, (player, enemy) => {
       if (player.body.velocity.y > 0 && player.body.bottom < enemy.body.y + 20) {
+        // Injak dari atas: musuh mati, player mantul
         enemy.die(); 
         player.setVelocityY(-250); 
       } else {
+        // Kena dari depan/samping: player mati, kembali ke map 1
         if (!player.isDead) {
           player.isDead = true;
+          this.isDead = true;
           window.gameScore = 0;
           player.setVelocity(0, 0); 
           player.body.enable = false; 
           player.play("death", true); 
-          
-          this.physics.pause(); 
-          this.time.delayedCall(1000, () => {
-            this.scene.restart();
+
+          player.once("animationcomplete-death", () => {
+            this.scene.start("scenePlay");
           });
         }
       }
