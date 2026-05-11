@@ -86,8 +86,8 @@ var scenePlay4 = new Phaser.Class({
     // GANTI ANGKA X DAN Y DI BAWAH INI UNTUK MENGUBAH POSISI KOIN
     spawnCoin(150, 150);
     spawnCoin(300, 150);
-    spawnCoin(450, 150);
-    spawnCoin(600, 150);
+    spawnCoin(450, 70);
+    spawnCoin(600, 200);
 
     this.player = this.physics.add.sprite(10, 175, "knight");
 
@@ -157,9 +157,9 @@ var scenePlay4 = new Phaser.Class({
     
     // GANTI ANGKA X DAN Y DI BAWAH INI UNTUK MENGUBAH POSISI
     // format: new Enemy(this, posisi_X, posisi_Y, jarak_patroli_blok)
-    this.enemies.add(new Enemy(this, 250, 150, 2)); // Musuh 1
-    this.enemies.add(new Enemy(this, 400, 150, 3)); // Musuh 2
-    this.enemies.add(new Enemy(this, 550, 150, 2)); // Musuh 3
+    this.enemies.add(new Enemy(this, 150, 10, 2)); // Musuh 1
+    this.enemies.add(new Enemy(this, 430, 10, 1)); // Musuh 2
+    this.enemies.add(new Enemy(this, 500, 150, 1)); // Musuh 3
     
     if (typeof layer2 !== 'undefined' && layer2) {
       this.physics.add.collider(this.enemies, layer2);

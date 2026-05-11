@@ -87,7 +87,7 @@ var scenePlay5 = new Phaser.Class({
     spawnCoin(150, 150);
     spawnCoin(300, 150);
     spawnCoin(450, 150);
-    spawnCoin(600, 150);
+    spawnCoin(600, 250);
 
     this.player = this.physics.add.sprite(10, 175, "knight");
 
