@@ -84,11 +84,16 @@
       this.coins = this.physics.add.group();
       
       // Fungsi bantuan untuk menaruh koin
-      const spawnCoin = (x, y) => {
-        let coin = this.coins.create(x, y, "coin");
-        coin.play("coin_spin");
-        coin.body.allowGravity = false;
-      };
+      let collectedCoins = this.registry.get('collectedCoins') || {};
+    const spawnCoin = (x, y) => {
+      let coinId = this.scene.key + "_" + x + "_" + y;
+      if (collectedCoins[coinId]) return;
+
+      let coin = this.coins.create(x, y, "coin");
+      coin.play("coin_spin");
+      coin.body.allowGravity = false;
+      coin.coinId = coinId;
+    };
 
       // GANTI ANGKA X DAN Y DI BAWAH INI UNTUK MENGUBAH POSISI KOIN
       spawnCoin(150, 250);
@@ -110,7 +115,15 @@
         resolution: 4 // Meningkatkan resolusi agar teks tidak buram saat di-scale
       }).setOrigin(0.5, 1).setDepth(100).setVisible(false);
 
-      this.player = this.physics.add.sprite(100, 100, "knight");
+      
+    let spawnX = 100;
+    let spawnY = 100;
+    let playerSpawn = this.registry.get('playerSpawn');
+    if (playerSpawn && playerSpawn.targetScene === this.scene.key) {
+      spawnX = playerSpawn.x;
+      spawnY = playerSpawn.y;
+    }
+    this.player = this.physics.add.sprite(spawnX, spawnY, "knight");
       
       // Collider antara player dan NPC
       this.physics.add.collider(this.player, this.npc, () => {
@@ -154,11 +167,19 @@
 
       // SPAWN MUSUH SECARA MANUAL
       this.enemies = this.add.group();
+    let killedEnemies = this.registry.get('killedEnemies') || {};
+    const spawnEnemy = (x, y, range) => {
+      let enemyId = this.scene.key + "_enemy_" + x + "_" + y;
+      if (killedEnemies[enemyId]) return;
+      let enemy = new Enemy(this, x, y, range);
+      enemy.enemyId = enemyId;
+      this.enemies.add(enemy);
+    };
       
       // GANTI ANGKA X DAN Y DI BAWAH INI UNTUK MENGUBAH POSISI
       // format: new Enemy(this, posisi_X, posisi_Y, jarak_patroli_blok)
-      this.enemies.add(new Enemy(this, 250, 150, 2)); // Musuh 1
-      this.enemies.add(new Enemy(this, 400, 150, 5)); // Musuh 2
+      spawnEnemy(250, 150, 2); // Musuh 1
+      spawnEnemy(400, 150, 5); // Musuh 2
       
       if (typeof layer2 !== 'undefined' && layer2) {
         this.physics.add.collider(this.enemies, layer2);
@@ -168,13 +189,16 @@
       this.physics.add.overlap(this.player, this.enemies, (player, enemy) => {
         // Jika player sedang jatuh ke bawah (velocity y > 0) dan posisi kakinya berada di atas musuh
         if (player.body.velocity.y > 0 && player.body.bottom < enemy.body.y + 20) {
-          enemy.die(); // Panggil fungsi mati di musuh yang bersangkutan
+          enemy.die();
+          let killedEnemies = this.registry.get('killedEnemies') || {};
+          if (enemy.enemyId) killedEnemies[enemy.enemyId] = true;
+          this.registry.set('killedEnemies', killedEnemies); // Panggil fungsi mati di musuh yang bersangkutan
           player.setVelocityY(-250); // Buat player memantul ke atas
         } else {
           // Jika terkena dari samping atau bawah, player yang mati
           if (!player.isDead) {
             player.isDead = true;
-            window.gameScore = 0;
+            window.gameScore = 0; this.registry.set('collectedCoins', {}); this.registry.set('killedEnemies', {});
             player.setVelocity(0, 0); // Hentikan gerakan player
             player.body.enable = false; // Matikan fisika player
             player.play("death", true); // Mainkan animasi mati knight
@@ -265,18 +289,41 @@
       }
 
       // Pindah ke scenePlay2 (map selanjutnya) jika player berjalan melebihi batas kanan layar (672px)
-      if (this.player.x > 672) {
-        this.scene.start("scenePlay2");
+    if (this.player.x > 672) {
+      this.registry.set('playerSpawn', { x: 20, y: this.player.y, targetScene: "scenePlay2" });
+      this.registry.set('cameFrom_scenePlay2', this.scene.key);
+      this.scene.start("scenePlay2");
+    }
+
+    if (this.scene.key === "scenePlay" && this.player.x < 10) {
+      this.player.x = 10;
+    }
+
+    if (this.scene.key !== "scenePlay" && this.player.x < 0) {
+      let prev = this.registry.get('cameFrom_' + this.scene.key);
+      if (prev) {
+        this.registry.set('playerSpawn', { x: 650, y: this.player.y, targetScene: prev });
+        this.scene.start(prev);
       }
+    }
+    
+    if (this.scene.key === "scenePlay6" && this.player.y < 0) {
+      let prev = this.registry.get('cameFrom_' + this.scene.key) || "scenePlay3";
+      this.registry.set('playerSpawn', { x: this.player.x, y: 300, targetScene: prev });
+      this.scene.start(prev);
+    }
+    
     },
 
     // Fungsi yang dipanggil saat player menyentuh koin
     collectCoin: function (player, coin) {
-      // Menghilangkan koin dari layar dan menonaktifkan fisiknya (diambil)
-      coin.disableBody(true, true);
-      
-      // Tambah skor koin
-      window.gameScore += 1;
-      this.scoreText.setText('Coin: ' + window.gameScore);
-    },
+    coin.disableBody(true, true);
+    
+    let collectedCoins = this.registry.get('collectedCoins') || {};
+    collectedCoins[coin.coinId] = true;
+    this.registry.set('collectedCoins', collectedCoins);
+
+    window.gameScore += 1;
+    this.scoreText.setText('Coin: ' + window.gameScore);
+  },
   });

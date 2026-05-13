@@ -68,7 +68,15 @@ var scenePlay8 = new Phaser.Class({
     });
 
     // PLAYER Setup
-    this.player = this.physics.add.sprite(50, 150, "knight");
+    
+    let spawnX = 50;
+    let spawnY = 150;
+    let playerSpawn = this.registry.get('playerSpawn');
+    if (playerSpawn && playerSpawn.targetScene === this.scene.key) {
+      spawnX = playerSpawn.x;
+      spawnY = playerSpawn.y;
+    }
+    this.player = this.physics.add.sprite(spawnX, spawnY, "knight");
     this.player.body.setSize(14, 18);
     this.player.body.setOffset(9, 10);
     this.player.play("idle");

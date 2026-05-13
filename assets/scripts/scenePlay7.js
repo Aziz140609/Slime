@@ -77,10 +77,15 @@ var scenePlay7 = new Phaser.Class({
     this.coins = this.physics.add.group();
     
     // Fungsi bantuan untuk menaruh koin
+    let collectedCoins = this.registry.get('collectedCoins') || {};
     const spawnCoin = (x, y) => {
+      let coinId = this.scene.key + "_" + x + "_" + y;
+      if (collectedCoins[coinId]) return;
+
       let coin = this.coins.create(x, y, "coin");
       coin.play("coin_spin");
       coin.body.allowGravity = false;
+      coin.coinId = coinId;
     };
 
     // GANTI ANGKA X DAN Y DI BAWAH INI UNTUK MENGUBAH POSISI KOIN
@@ -89,7 +94,15 @@ var scenePlay7 = new Phaser.Class({
     spawnCoin(500, 125);
     spawnCoin(550, 100);
 
-    this.player = this.physics.add.sprite(10, 175, "knight");
+    
+    let spawnX = 10;
+    let spawnY = 175;
+    let playerSpawn = this.registry.get('playerSpawn');
+    if (playerSpawn && playerSpawn.targetScene === this.scene.key) {
+      spawnX = playerSpawn.x;
+      spawnY = playerSpawn.y;
+    }
+    this.player = this.physics.add.sprite(spawnX, spawnY, "knight");
 
     // Memperkecil kotak fisika (hitbox) agar tidak mengambang di atas tanah
     // setSize(lebar, tinggi) mengatur ukuran kotak
@@ -123,7 +136,7 @@ var scenePlay7 = new Phaser.Class({
       this.physics.add.collider(this.player, layer3, () => {
         if (this.isDead) return; // Mencegah kode ini berjalan berulang-ulang
         this.isDead = true;
-        window.gameScore = 0; // Tandai player sudah mati
+        window.gameScore = 0; this.registry.set('collectedCoins', {}); this.registry.set('killedEnemies', {}); // Tandai player sudah mati
 
         // Hentikan pergerakan
         this.player.setVelocity(0, 0);
@@ -154,14 +167,22 @@ var scenePlay7 = new Phaser.Class({
     // Setup input keyboard
     // SPAWN MUSUH SECARA MANUAL
     this.enemies = this.add.group();
+    let killedEnemies = this.registry.get('killedEnemies') || {};
+    const spawnEnemy = (x, y, range) => {
+      let enemyId = this.scene.key + "_enemy_" + x + "_" + y;
+      if (killedEnemies[enemyId]) return;
+      let enemy = new Enemy(this, x, y, range);
+      enemy.enemyId = enemyId;
+      this.enemies.add(enemy);
+    };
     
     // GANTI ANGKA X DAN Y DI BAWAH INI UNTUK MENGUBAH POSISI
     // format: new Enemy(this, posisi_X, posisi_Y, jarak_patroli_blok)
-    this.enemies.add(new Enemy(this, 250, 150, 2)); // Musuh 1
-    this.enemies.add(new Enemy(this, 400, 150, 4)); // Musuh 2
-    this.enemies.add(new Enemy(this, 550, 150, 2)); // Musuh 3
-    this.enemies.add(new Enemy(this, 350, 90, 1));
-    this.enemies.add(new Enemy(this, 505, 50, 2));
+    spawnEnemy(250, 150, 2); // Musuh 1
+    spawnEnemy(400, 150, 4); // Musuh 2
+    spawnEnemy(550, 150, 2); // Musuh 3
+    spawnEnemy(350, 90, 1);
+    spawnEnemy(505, 50, 2);
 
     if (typeof layer2 !== 'undefined' && layer2) {
       this.physics.add.collider(this.enemies, layer2);
@@ -171,14 +192,17 @@ var scenePlay7 = new Phaser.Class({
     this.physics.add.overlap(this.player, this.enemies, (player, enemy) => {
       if (player.body.velocity.y > 0 && player.body.bottom < enemy.body.y + 20) {
         // Injak dari atas: musuh mati, player mantul
-        enemy.die(); 
+        enemy.die();
+          let killedEnemies = this.registry.get('killedEnemies') || {};
+          if (enemy.enemyId) killedEnemies[enemy.enemyId] = true;
+          this.registry.set('killedEnemies', killedEnemies); 
         player.setVelocityY(-250); 
       } else {
         // Kena dari depan/samping: player mati, kembali ke map 1
         if (!player.isDead) {
           player.isDead = true;
           this.isDead = true;
-          window.gameScore = 0;
+          window.gameScore = 0; this.registry.set('collectedCoins', {}); this.registry.set('killedEnemies', {});
           player.setVelocity(0, 0); 
           player.body.enable = false; 
           player.play("death", true); 
@@ -269,15 +293,34 @@ var scenePlay7 = new Phaser.Class({
 
     // PINDAH SCENE
     if (this.player.x > 672) {
+      this.registry.set('playerSpawn', { x: 20, y: this.player.y, targetScene: "scenePlay8" });
+      this.registry.set('cameFrom_scenePlay8', this.scene.key);
       this.scene.start("scenePlay8");
     }
+
+    if (this.scene.key !== "scenePlay" && this.player.x < 0) {
+      let prev = this.registry.get('cameFrom_' + this.scene.key);
+      if (prev) {
+        this.registry.set('playerSpawn', { x: 650, y: this.player.y, targetScene: prev });
+        this.scene.start(prev);
+      }
+    }
+    
+    if (this.scene.key === "scenePlay6" && this.player.y < 0) {
+      let prev = this.registry.get('cameFrom_' + this.scene.key) || "scenePlay3";
+      this.registry.set('playerSpawn', { x: this.player.x, y: 300, targetScene: prev });
+      this.scene.start(prev);
+    }
+    
   },
 
   collectCoin: function (player, coin) {
-    // Menghilangkan koin dari layar dan menonaktifkan fisiknya (diambil)
     coin.disableBody(true, true);
     
-    // Tambah skor koin
+    let collectedCoins = this.registry.get('collectedCoins') || {};
+    collectedCoins[coin.coinId] = true;
+    this.registry.set('collectedCoins', collectedCoins);
+
     window.gameScore += 1;
     this.scoreText.setText('Coin: ' + window.gameScore);
   },
