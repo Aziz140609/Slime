@@ -16,12 +16,25 @@ var scenePlay3 = new Phaser.Class({
       frameWidth: 16,
       frameHeight: 16,
     });
+
+    this.load.audio("music", "assets/audio/music/time_for_adventure.mp3");
+    this.load.audio("jump", "assets/audio/sounds/jump.wav");
+    this.load.audio("coin", "assets/audio/sounds/coin.wav");
   },
 
   create: function () {
     // 🧱 MAP
     const map = this.make.tilemap({ key: "map3" });
     const tileset = map.addTilesetImage("world_tileset", "world_tiles");
+
+    //Sound
+    this.bgMusic = this.sound.add("music", {
+      loop: true,
+      volume: 0.5,
+    });
+    this.jumpSound = this.sound.add("jump");
+    this.coinSound = this.sound.add("coin");
+    this.bgMusic.play();
 
     // Memanggil semua layer yang ada di map.json
 
@@ -296,6 +309,7 @@ var scenePlay3 = new Phaser.Class({
     // Logika lompat (hanya bisa lompat jika tombol atas ditekan & sedang menyentuh tanah)
     if ((this.cursors.up.isDown || this.wasd.W.isDown) && this.player.body.blocked.down) {
       this.player.setVelocityY(-250); // Kecepatan lompat diperlambat
+      this.jumpSound.play();
     }
 
     // Pindah ke map selanjutnya jika player berjalan melebihi batas kanan layar
@@ -330,6 +344,7 @@ var scenePlay3 = new Phaser.Class({
   // Fungsi yang dipanggil saat player menyentuh koin
   collectCoin: function (player, coin) {
     coin.disableBody(true, true);
+    this.coinSound.play();
     
     let collectedCoins = this.registry.get('collectedCoins') || {};
     collectedCoins[coin.coinId] = true;

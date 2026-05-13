@@ -22,6 +22,11 @@
         frameWidth: 24,
         frameHeight: 24,
       });
+
+      this.load.audio("music", "assets/audio/music/time_for_adventure.mp3");
+      this.load.audio("jump", "assets/audio/sounds/jump.wav");
+      this.load.audio("coin", "assets/audio/sounds/coin.wav");
+      
     },
 
     create: function () {
@@ -31,6 +36,15 @@
       
       // Jika title.png adalah Logo (UI) yang harus tampil di paling depan:
       this.add.image(100, 100, "title").setOrigin(0, 0).setDepth(20);
+
+      //Sound
+      this.bgMusic = this.sound.add("music", {
+        loop: true,
+        volume: 0.5,
+       });
+      this.jumpSound = this.sound.add("jump");
+      this.coinSound = this.sound.add("coin");
+      this.bgMusic.play();  
 
       // Memanggil semua layer yang ada di map.json
 
@@ -286,6 +300,7 @@
       // Logika lompat (Panah atas ATAU tombol W)
       if ((this.cursors.up.isDown || this.wasd.W.isDown) && this.player.body.blocked.down) {
         this.player.setVelocityY(-250); // Kecepatan lompat diperlambat
+        this.jumpSound.play(); 
       }
 
       // Pindah ke scenePlay2 (map selanjutnya) jika player berjalan melebihi batas kanan layar (672px)
@@ -318,6 +333,7 @@
     // Fungsi yang dipanggil saat player menyentuh koin
     collectCoin: function (player, coin) {
     coin.disableBody(true, true);
+    this.coinSound.play();
     
     let collectedCoins = this.registry.get('collectedCoins') || {};
     collectedCoins[coin.coinId] = true;

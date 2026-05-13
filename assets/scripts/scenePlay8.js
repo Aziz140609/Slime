@@ -16,12 +16,25 @@ var scenePlay8 = new Phaser.Class({
     this.load.spritesheet("boss_walk", "assets/images/BOSS/dark_knight_walk-Sheet.png", { frameWidth: 48, frameHeight: 32 });
     this.load.image("boss_idle", "assets/images/BOSS/dark_knight_idle.png");
     this.load.spritesheet("boss_attack", "assets/images/BOSS/dark_knight_attack1-Sheet.png", { frameWidth: 80, frameHeight: 32 });
+
+    this.load.audio("music", "assets/audio/music/time_for_adventure.mp3");
+    this.load.audio("jump", "assets/audio/sounds/jump.wav");
+    this.load.audio("coin", "assets/audio/sounds/coin.wav");
   },
 
   create: function () {
     // 🧱 MAP
     const map = this.make.tilemap({ key: "map8" });
     const tileset = map.addTilesetImage("world_tileset", "world_tiles");
+
+    //Sound
+    this.bgMusic = this.sound.add("music", {
+      loop: true,
+      volume: 0.5,
+    });
+    this.jumpSound = this.sound.add("jump");
+    this.coinSound = this.sound.add("coin");
+    this.bgMusic.play();
 
     const layer1 = map.createLayer("Tile Layer 1", tileset, 0, 0);
     const layer2 = map.createLayer("Tile Layer 2", tileset, 0, 0);
@@ -278,6 +291,7 @@ var scenePlay8 = new Phaser.Class({
 
     if ((this.cursors.up.isDown || this.wasd.W.isDown) && this.player.body.blocked.down) {
       this.player.setVelocityY(-300);
+      this.jumpSound.play();
     }
 
     // Mati jika jatuh dari map

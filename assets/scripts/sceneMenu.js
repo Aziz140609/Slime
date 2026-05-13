@@ -7,6 +7,9 @@ var sceneMenu = new Phaser.Class({
         this.load.image('bg_start', 'assets/images/bg_start.png');
         this.load.image('play', 'assets/images/play.png');
         this.load.image('slime', 'assets/images/slime.png');
+
+        this.load.audio("music", "assets/audio/music/time_for_adventure.mp3");
+        this.load.audio("tap", "assets/audio/sounds/tap.wav");
     },
     create: function () {
         const { width, height } = this.scale;
@@ -20,6 +23,14 @@ var sceneMenu = new Phaser.Class({
 
         let play = this.add.image(width / 2, height / 2 + 80, 'play').setScale(0.2).setInteractive();
         let slime = this.add.image(width / 2, height / 2 - 40, 'slime').setScale(0.15);
+
+        // Sound
+        this.bgMusic = this.sound.add("music", {
+            loop: true,
+            volume: 0.5,
+        });
+        this.bgMusic.play();
+        this.tapSound = this.sound.add("tap");
 
         // Animasi kenyel-kenyel untuk slime (Judul/Karakter)
         this.tweens.add({
@@ -46,6 +57,7 @@ var sceneMenu = new Phaser.Class({
          this.input.on('gameobjectup', (pointer, gameObject) => {
             if (gameObject === play) {
                 play.clearTint();
+                this.tapSound.play();
                 this.scene.start('scenePlay');
             }
         });
